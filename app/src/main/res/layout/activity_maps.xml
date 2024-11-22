@@ -9,6 +9,8 @@
         android:layout_height="match_parent"
         tools:context=".MapsActivity">
 
+
+
         <org.osmdroid.views.MapView
             android:id="@+id/map"
             android:layout_width="match_parent"
@@ -16,11 +18,61 @@
 
         <com.google.android.material.floatingactionbutton.FloatingActionButton
             android:layout_width="wrap_content"
-            android:id="@+id/add"
+            android:id="@+id/add_shape"
             app:useCompatPadding="true"
             app:layout_constraintVertical_chainStyle="packed"
             app:layout_constraintVertical_bias="1"
             app:layout_constraintTop_toTopOf="parent"
+            app:layout_constraintEnd_toEndOf="parent"
+            app:layout_constraintBottom_toTopOf="@id/add_polygon"
+            android:backgroundTint="@color/white"
+            android:src="@drawable/baseline_image_24"
+            android:layout_height="wrap_content"/>
+
+        <com.google.android.material.floatingactionbutton.FloatingActionButton
+            android:layout_width="wrap_content"
+            android:id="@+id/add_polygon"
+            app:useCompatPadding="true"
+            app:layout_constraintVertical_chainStyle="packed"
+            app:layout_constraintVertical_bias="1"
+            app:layout_constraintTop_toTopOf="parent"
+            app:layout_constraintEnd_toEndOf="parent"
+            app:layout_constraintBottom_toTopOf="@id/add_polyline"
+            android:backgroundTint="@color/white"
+            android:src="@drawable/outline_pentagon_24"
+            android:layout_height="wrap_content"/>
+
+        <com.google.android.material.floatingactionbutton.FloatingActionButton
+            android:layout_width="wrap_content"
+            android:id="@+id/add_polyline"
+            app:useCompatPadding="true"
+            app:layout_constraintVertical_chainStyle="packed"
+            app:layout_constraintVertical_bias="1"
+            app:layout_constraintTop_toBottomOf="@id/add_polygon"
+            app:layout_constraintEnd_toEndOf="parent"
+            app:layout_constraintBottom_toTopOf="@id/add_location"
+            android:backgroundTint="@color/white"
+            android:src="@drawable/baseline_polyline_24"
+            android:layout_height="wrap_content"/>
+
+        <com.google.android.material.floatingactionbutton.FloatingActionButton
+            android:layout_width="wrap_content"
+            android:id="@+id/add_location"
+            app:useCompatPadding="true"
+            app:layout_constraintVertical_chainStyle="packed"
+            app:layout_constraintVertical_bias="1"
+            app:layout_constraintTop_toBottomOf="@id/add_polyline"
+            app:layout_constraintEnd_toEndOf="parent"
+            app:layout_constraintBottom_toTopOf="@id/add"
+            android:backgroundTint="@color/white"
+            android:src="@drawable/baseline_location_pin_24"
+            android:layout_height="wrap_content"/>
+
+        <com.google.android.material.floatingactionbutton.FloatingActionButton
+            android:layout_width="wrap_content"
+            android:id="@+id/add"
+            app:useCompatPadding="true"
+            app:layout_constraintTop_toBottomOf="@id/add_location"
             app:layout_constraintEnd_toEndOf="parent"
             app:layout_constraintBottom_toTopOf="@id/my_location"
             android:backgroundTint="@color/white"
@@ -36,6 +88,16 @@
             app:layout_constraintBottom_toBottomOf="parent"
             android:backgroundTint="@color/white"
             android:src="@drawable/baseline_my_location_24"
+            android:layout_height="wrap_content"/>
+
+        <ImageView
+            app:layout_constraintStart_toStartOf="parent"
+            app:layout_constraintEnd_toEndOf="parent"
+            app:layout_constraintTop_toTopOf="parent"
+            app:layout_constraintBottom_toBottomOf="parent"
+            android:src="@drawable/baseline_add_24"
+            app:tint="@android:color/holo_red_dark"
+            android:layout_width="wrap_content"
             android:layout_height="wrap_content"/>
 
 
