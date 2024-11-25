@@ -10,22 +10,26 @@ import android.content.pm.PackageManager
 import android.graphics.DashPathEffect
 import android.graphics.Path
 import android.graphics.PathDashPathEffect
+import android.graphics.drawable.BitmapDrawable
 import android.net.Uri
 import android.os.Bundle
 import android.provider.Settings
 import android.util.Log
 import androidx.activity.enableEdgeToEdge
 import androidx.activity.result.contract.ActivityResultContracts
+import androidx.activity.viewModels
 import androidx.appcompat.app.AppCompatActivity
-import androidx.appcompat.content.res.AppCompatResources
 import androidx.core.app.ActivityCompat
 import androidx.core.content.ContextCompat
+import androidx.core.graphics.drawable.toBitmap
+import androidx.core.graphics.drawable.toDrawable
 import androidx.core.view.ViewCompat
 import androidx.core.view.WindowInsetsCompat
 import com.google.android.gms.location.LocationServices
 import com.google.android.gms.location.Priority.PRIORITY_HIGH_ACCURACY
 import com.google.android.gms.tasks.CancellationTokenSource
 import com.latrics.mapsosm.databinding.ActivityMapsBinding
+import com.latrics.mapsosm.ui.MapViewmodel
 import org.osmdroid.config.Configuration
 import org.osmdroid.events.MapListener
 import org.osmdroid.events.ScrollEvent
@@ -34,7 +38,6 @@ import org.osmdroid.shape.ShapeConverter
 import org.osmdroid.tileprovider.tilesource.TileSourceFactory
 import org.osmdroid.util.BoundingBox
 import org.osmdroid.util.GeoPoint
-import org.osmdroid.util.PathBuilder
 import org.osmdroid.views.CustomZoomButtonsController
 import org.osmdroid.views.MapView.getTileSystem
 import org.osmdroid.views.overlay.Marker
@@ -49,18 +52,13 @@ import java.io.IOException
 import kotlin.math.atan2
 import kotlin.math.cos
 import kotlin.math.sin
+import kotlin.random.Random
 
-
-enum class ShapeType {
-    POINT,
-    POLYLINE,
-    POLYGON,
-    SHAPE
-}
-
-data class MarkerData(val id: String, val position: GeoPoint, val title: String)
 
 class MapsActivity : AppCompatActivity() {
+
+    val viewmodel by viewModels<MapViewmodel>()
+
     var shapeType = ShapeType.POLYLINE
     val locationPermissions = arrayOf(
         ACCESS_COARSE_LOCATION,
@@ -74,6 +72,7 @@ class MapsActivity : AppCompatActivity() {
     val distanceMarker by lazy {
         Marker(binding.map)
     }
+
 
     val polyline by lazy {
         Polyline(binding.map)
@@ -143,8 +142,6 @@ class MapsActivity : AppCompatActivity() {
 
                     }
 
-
-
                     ShapeType.POLYLINE -> {
                         center = GeoPoint(binding.map.getMapCenter())
                         binding.map.overlayManager.remove(dashedPolyline)
@@ -156,9 +153,11 @@ class MapsActivity : AppCompatActivity() {
                                 addPoint(polyline.actualPoints.last())
                             }
                         }
+
+
                         val circlePathEffect = PathDashPathEffect(Path().apply {
-                            addCircle(0f, 0f, 8f, Path.Direction.CW)
-                        }, 40f, 0f, PathDashPathEffect.Style.TRANSLATE)
+                            addCircle(0f, 0f, 2f, Path.Direction.CW)
+                        }, 10f, 0f, PathDashPathEffect.Style.TRANSLATE)
                         dashedPolyline.outlinePaint.setPathEffect(
                             /*DashPathEffect(
                                 floatArrayOf(
@@ -245,7 +244,12 @@ class MapsActivity : AppCompatActivity() {
                 ).toFloat()
             }"
         )
-        marker.rotation = 0f
+        marker.rotation =  angleFromCoordinate(
+            lat1 = polyline.actualPoints.first().latitude,
+            lat2 = polyline.actualPoints.last().latitude,
+            long1 = polyline.actualPoints.first().longitude,
+            long2 = polyline.actualPoints.last().longitude
+        ).toFloat() - 90f
         marker.textLabelBackgroundColor = ContextCompat.getColor(this, R.color.teal_200)
         marker.position = polyline.bounds.centerWithDateLine
         return marker
@@ -255,12 +259,12 @@ class MapsActivity : AppCompatActivity() {
         lat1: Double, long1: Double, lat2: Double,
         long2: Double
     ): Double {
-        val dLon = (long2 - long1)
+//        val dLon = (long2 - long1)
+//
+//        val y = sin(dLon) * cos(lat2)
+//        val x = cos(lat1) * sin(lat2) - (sin(lat1) * cos(lat2) * cos(dLon))
 
-        val y = sin(dLon) * cos(lat2)
-        val x = cos(lat1) * sin(lat2) - (sin(lat1) * cos(lat2) * cos(dLon))
-
-        var brng = atan2(y, x)
+        var brng = atan2(long2 - long1, lat2 - lat1)
 
         brng = Math.toDegrees(brng)
         brng = (brng + 360) % 360
@@ -348,6 +352,22 @@ class MapsActivity : AppCompatActivity() {
 
     }
 
+    val markerListener = object : Marker.OnMarkerDragListener {
+        override fun onMarkerDrag(marker: Marker?) {
+            Log.d("ganga", "onMarkerDrag ${marker?.id}")
+//        marker?.position = marker?.position
+        }
+
+        override fun onMarkerDragEnd(marker: Marker?) {
+//        Log.d("ganga", "onMarkerDragEnd")
+        }
+
+        override fun onMarkerDragStart(marker: Marker?) {
+//        Log.d("ganga", "onMarkerDragStart")
+        }
+
+    }
+
     private fun addPolygon() {
         val startPoint =
             GeoPoint(binding.map.getMapCenter().latitude, binding.map.getMapCenter().longitude)
@@ -360,13 +380,17 @@ class MapsActivity : AppCompatActivity() {
             GeoPoint(binding.map.getMapCenter().latitude, binding.map.getMapCenter().longitude)
         val startMarker = Marker(binding.map)
         startMarker.position = startPoint
-        startMarker.setAnchor(Marker.ANCHOR_CENTER, Marker.ANCHOR_BOTTOM)
+        startMarker.isDraggable = true
+        startMarker.id = Random.nextInt().toString()
+        startMarker.setOnMarkerDragListener(markerListener)
         startMarker.setIcon(
-            AppCompatResources.getDrawable(
+            ContextCompat.getDrawable(
                 this,
-                R.drawable.baseline_location_pin_24
+                R.drawable.marker
             )
         )
+        startMarker.setAnchor(Marker.ANCHOR_CENTER, Marker.ANCHOR_CENTER)
+
         startMarker.setTitle("Start point")
 
         binding.map.getOverlays().add(startMarker)
@@ -454,6 +478,8 @@ class MapsActivity : AppCompatActivity() {
         }
 
     }
+
+
 
     private fun configureCacheTilePath() {
         val osmConfig = Configuration.getInstance()
