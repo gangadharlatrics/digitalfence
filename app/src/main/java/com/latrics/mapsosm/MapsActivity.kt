@@ -31,6 +31,7 @@ import com.google.android.gms.tasks.CancellationTokenSource
 import com.latrics.mapsosm.databinding.ActivityMapsBinding
 import com.latrics.mapsosm.ui.MapViewmodel
 import org.osmdroid.config.Configuration
+import org.osmdroid.events.MapEventsReceiver
 import org.osmdroid.events.MapListener
 import org.osmdroid.events.ScrollEvent
 import org.osmdroid.events.ZoomEvent
@@ -55,7 +56,7 @@ import kotlin.math.sin
 import kotlin.random.Random
 
 
-class MapsActivity : AppCompatActivity() {
+class MapsActivity : AppCompatActivity(), MapEventsReceiver {
 
     val viewmodel by viewModels<MapViewmodel>()
 
@@ -122,6 +123,7 @@ class MapsActivity : AppCompatActivity() {
                 ShapeType.SHAPE -> addShape()
             }
         }
+
         binding.addLocation.setOnClickListener {
             shapeType = ShapeType.POINT
         }
@@ -474,7 +476,7 @@ class MapsActivity : AppCompatActivity() {
                 locationPermissionLauncher.launch(
                     locationPermissions
                 )
-            }
+            }   
         }
 
     }
@@ -488,5 +490,14 @@ class MapsActivity : AppCompatActivity() {
         osmConfig.osmdroidBasePath = basePath
         val tileCache = File(osmConfig.osmdroidBasePath, "tile")
         osmConfig.osmdroidTileCache = tileCache
+    }
+
+    override fun singleTapConfirmedHelper(p: GeoPoint?): Boolean {
+        TODO("Not yet implemented")
+
+    }
+
+    override fun longPressHelper(p: GeoPoint?): Boolean {
+        TODO("Not yet implemented")
     }
 }
